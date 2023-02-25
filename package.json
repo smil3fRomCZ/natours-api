@@ -1,0 +1,39 @@
+{
+  "name": "natours-api",
+  "version": "1.0.0",
+  "description": "app for travel agency",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon server.js",
+    "start:prod": "SET NODE_ENV=production&&nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smil3fRomCZ/natours-api.git"
+  },
+  "author": "jan melicherik",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smil3fRomCZ/natours-api/issues"
+  },
+  "homepage": "https://github.com/smil3fRomCZ/natours-api#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mongoose": "^5.13.16"
+  },
+  "devDependencies": {
+    "eslint": "^8.34.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.8.4"
+  }
+}
