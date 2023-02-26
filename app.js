@@ -1,4 +1,5 @@
 const express = require('express');
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-unpublished-require
 const morgan = require('morgan');
 
 const userRouter = require('./routes/userRouter');

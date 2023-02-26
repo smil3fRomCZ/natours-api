@@ -15,6 +15,8 @@ mongoose
     useCreateIndex: true,
     useUnifiedTopology: true,
   })
+  // eslint-disable-next-line no-console
   .then(() => console.log('DB connection successfull'));
 
+// eslint-disable-next-line no-console
 app.listen(PORT, () => console.log(`App running on port: ${PORT}`));
