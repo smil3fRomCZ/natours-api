@@ -20,10 +20,12 @@ app.use(express.static(`${__dirname}/public`));
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+// Undefined routes
 app.all('*', (req, res, next) => {
   next(new AppError(`Cant find ${req.originalUrl}`, 404));
 });
 
+// Error handler
 app.use(globalErrorHandler);
 
 module.exports = app;
