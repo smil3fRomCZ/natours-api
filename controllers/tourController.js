@@ -64,6 +64,7 @@ exports.updateTour = async (req, res) => {
     const updatedData = req.body;
     const tour = await Tour.findByIdAndUpdate(tourId, updatedData, {
       new: true,
+      runValidators: true,
     });
     res.status(200).json({ status: 'success', data: { tour } });
   } catch (error) {
@@ -105,11 +106,10 @@ exports.getTourStats = async (req, res) => {
           avgPrice: 1,
         },
       },
-      {
-        $match: { _id: { $ne: 'EASY' } },
-      },
     ]);
-    res.status(200).json({ status: 'success', data: { stats } });
+    res
+      .status(200)
+      .json({ status: 'success', results: stats.length, data: { stats } });
   } catch (error) {
     res.status(404).json({ status: 'Fail', message: error });
   }
