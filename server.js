@@ -1,5 +1,14 @@
 require('dotenv').config({ path: './config.env' });
 const mongoose = require('mongoose');
+
+process.on('uncaughtException', (err) => {
+  // eslint-disable-next-line no-console
+  console.log('Unhandled exception. Shutting down');
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
 const app = require('./app');
 
 const PORT = process.env.PORT || 5000;
@@ -18,5 +27,17 @@ mongoose
   // eslint-disable-next-line no-console
   .then(() => console.log('DB connection successfull'));
 
-// eslint-disable-next-line no-console
-app.listen(PORT, () => console.log(`App running on port: ${PORT}`));
+const server = app.listen(PORT, () =>
+  // eslint-disable-next-line no-console
+  console.log(`App running on port: ${PORT}`)
+);
+
+process.on('unhandledRejection', (err) => {
+  // eslint-disable-next-line no-console
+  console.log(err.name, err.message);
+  // eslint-disable-next-line no-console
+  console.log('Unhandled rejection. Shutting down');
+  server.close(() => {
+    process.exit(1);
+  });
+});
