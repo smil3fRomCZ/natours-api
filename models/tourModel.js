@@ -97,6 +97,7 @@ tourSchema.pre(/^find/, function (next) {
 });
 
 tourSchema.post(/^find/, function (docs, next) {
+  // eslint-disable-next-line no-console
   console.log(`Query took ${Date.now() - this.start} miliseconds`);
   next();
 });
@@ -104,7 +105,6 @@ tourSchema.post(/^find/, function (docs, next) {
 // Agreggation middleware
 tourSchema.pre('aggregate', function (next) {
   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log(this.pipeline());
   next();
 });
 
