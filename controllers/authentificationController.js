@@ -1,3 +1,4 @@
+const { promisify } = require('util');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
@@ -18,6 +19,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    passwordChangedAt: req.body.passwordChangedAt,
   };
   const newUser = await User.create(registrationData);
   const token = signToken(newUser._id);
@@ -50,4 +52,42 @@ exports.login = catchAsync(async (req, res, next) => {
     status: 'success',
     token,
   });
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1) Get the token and check if it exists
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token) {
+    return next(
+      new AppErrorHandler('You are not logged in! Pls log to gain access!', 401)
+    );
+  }
+  // 2) Verification token
+  const decoded = await promisify(jwt.verify)(token, secretKey);
+
+  // 3) Check if user still exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(
+      new AppErrorHandler('The user belonging to this token doesnt exist', 401)
+    );
+  }
+  // 4) Check if user changed password after the token was issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppErrorHandler(
+        'User recently changed password! Pls log in again',
+        401
+      )
+    );
+  }
+  // Grant access to protected route
+  req.user = currentUser;
+  next();
 });
