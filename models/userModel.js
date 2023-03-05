@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
@@ -15,10 +16,16 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail],
   },
   photo: { type: String },
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user',
+  },
   password: {
     type: String,
     required: [true, 'You must provide password'],
     minlength: 8,
+    select: false,
   },
   confirmPassword: {
     type: String,
@@ -31,6 +38,9 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not same',
     },
   },
+  passwordChangedAt: {
+    type: Date,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -40,6 +50,24 @@ userSchema.pre('save', async function (next) {
   this.confirmPassword = undefined;
   next();
 });
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (jwtTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimeStamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return jwtTimestamp < changedTimeStamp;
+  }
+  return false;
+};
 
 const User = mongoose.model('User', userSchema);
 

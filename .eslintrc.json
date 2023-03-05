@@ -21,6 +21,14 @@
         "version": ">=8.3.0",
         "ignores": []
       }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": false,
+        "peerDependencies": false
+      }
     ]
   }
 }
