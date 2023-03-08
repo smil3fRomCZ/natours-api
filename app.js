@@ -1,6 +1,12 @@
+/* eslint-disable node/no-unpublished-require */
+/* eslint-disable import/no-extraneous-dependencies */
 const express = require('express');
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-unpublished-require
 const morgan = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 const AppError = require('./utils/appErrorHandler');
 const globalErrorHandler = require('./controllers/errorController');
 
@@ -9,16 +15,40 @@ const tourRouter = require('./routes/tourRouter');
 
 const app = express();
 
-// Middlewares
-app.use(express.json());
+// MIDDLEWARES
+app.use(helmet());
+app.use(express.json({ limit: '10kb' }));
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-app.use(express.static(`${__dirname}/public`));
-app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
+
+// Data sanitization against NO SQL injection
+app.use(mongoSanitize());
+// Data sanitization against XSS
+app.use(xss());
+// Prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsAverage',
+      'maxGroupSize',
+      'ratingsQuantity',
+      'difficulty',
+      'price',
+    ],
+  })
+);
+// Request limiter
+const limiter = rateLimit({
+  max: 3,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour',
 });
+app.use('/api', limiter);
+
+// Serving static content
+app.use(express.static(`${__dirname}/public`));
 
 // Routes
 app.use('/api/v1/tours', tourRouter);

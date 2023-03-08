@@ -7,16 +7,28 @@ const catchAsync = require('../utils/asyncHandler');
 const AppErrorHandler = require('../utils/appErrorHandler');
 const sendEmail = require('../utils/emailHandler');
 
-const secretKey = process.env.JWT_SECRET;
-const expiration = process.env.JWT_EXPIRES_IN;
+const SECRET_KEY = process.env.JWT_SECRET;
+const EXPIRATION = process.env.JWT_EXPIRES_IN;
+const COOKIE_EXPIRATION = process.env.JWT_COOKIE_EXPIRES_IN;
 
 const signToken = (id) =>
-  jwt.sign({ id }, secretKey, {
-    expiresIn: expiration,
+  jwt.sign({ id }, SECRET_KEY, {
+    expiresIn: EXPIRATION,
   });
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(Date.now() + COOKIE_EXPIRATION * 24 * 60 * 60 * 1000),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
+  res.cookie('jwt', token, cookieOptions);
+  user.password = undefined;
+
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -71,7 +83,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   // 2) Verification token
-  const decoded = await promisify(jwt.verify)(token, secretKey);
+  const decoded = await promisify(jwt.verify)(token, SECRET_KEY);
 
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
