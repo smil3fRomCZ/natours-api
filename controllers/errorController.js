@@ -1,6 +1,6 @@
 const AppErrorHandler = require('../utils/appErrorHandler');
 
-// Error handlers function
+// Specific Error handlers function
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppErrorHandler(message, 400);
@@ -24,6 +24,7 @@ const handleJwtError = () =>
 const handleJwtExpirationError = () =>
   new AppErrorHandler('Your token expired! Pls log in again', 401);
 
+// Format DEV errors
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -33,20 +34,20 @@ const sendErrorDev = (err, res) => {
   });
 };
 
+// Format PROD errors
 const sendErrorProduction = (err, res) => {
   // Operational error - trusted error sending to client
   if (err.isOperational) {
-    res.status(err.statusCode).json({
+    res.sendStatus(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   } else {
-    // programming or unknown error - no leaking internal details
-    // Log error
+    // programming or unknown error
     // eslint-disable-next-line no-console
     console.log(err);
     // Send generic error
-    res.status(500).json({
+    res.sendStatus(500).json({
       status: 'error',
       message: 'Something went wrong',
     });
