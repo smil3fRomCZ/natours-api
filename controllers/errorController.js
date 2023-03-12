@@ -26,7 +26,7 @@ const handleJwtExpirationError = () =>
 
 // Format DEV errors
 const sendErrorDev = (err, res) => {
-  res.sendStatus(err.statusCode).json({
+  res.status(err.statusCode).json({
     status: err.status,
     error: err,
     message: err.message,
